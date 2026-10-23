@@ -11,14 +11,14 @@ The implementation uses dynamically allocated nodes and provides separate functi
 ## Features
 
 - Define a singly linked list using a `struct`.
-- Allocate nodes dynamically with `malloc`.
+- Allocate nodes dynamically using `malloc()`.
 - Append new nodes to the end of the list.
 - Print list elements in order.
 - Search for the first occurrence of a value.
 - Return the zero-based index of a matching value, or `-1` if it is not found.
 - Delete the first occurrence of a specified value.
 - Handle deletion of the head node separately.
-- Preserve the list when the requested deletion target does not exist.
+- Leave the list unchanged if the requested deletion target does not exist.
 - Check whether integer input is successfully read.
 - Release dynamically allocated memory before normal program termination.
 
@@ -27,9 +27,9 @@ The implementation uses dynamically allocated nodes and provides separate functi
 Each node contains two fields:
 
 - `data`: Stores an integer.
-- `next`: Points to the next node.
+- `next`: Points to the next node in the list.
 
-The `head` pointer refers to the first node. The last node points to `NULL`, and an empty list is represented by `head == NULL`.
+The `head` pointer references the first node. The last node points to `NULL`, and an empty list is represented by `head == NULL`.
 
 Example:
 
@@ -45,133 +45,92 @@ Nodes are dynamically allocated and do not need to occupy adjacent memory locati
 ## Functions
 
 | Function | Description |
-| --- | --- |
-| `printList(head)` | Prints the values stored in the list. |
+|---|---|
+| `printList(head)` | Prints all elements in the list. |
 | `appendNode(head, data)` | Creates a node and appends it to the end of the list. |
-| `searchList(head, target)` | Returns the first matching node's zero-based index, or `-1` if absent. |
+| `searchList(head, target)` | Returns the zero-based index of the first matching value, or `-1` if absent. |
 | `deleteNode(head, target)` | Deletes the first matching node and returns the updated head pointer. |
-| `freeList(head)` | Releases the memory allocated for all nodes. |
+| `freeList(head)` | Frees all nodes in the list. |
 
 ### Why Do Some Functions Return a Pointer?
 
-Both `appendNode` and `deleteNode` can change which node is the head of the list.
+Both `appendNode()` and `deleteNode()` can change the head pointer.
 
-- When appending to an empty list, the new node becomes the head.
-- When deleting the first node, the next node becomes the head.
-
-Therefore, the returned pointer must be assigned back to `head`:
+For example:
 
 ```c
 head = appendNode(head, number);
 head = deleteNode(head, num);
 ```
 
-Failing to update `head` can leave the program with an outdated pointer, including a pointer to a node that has already been freed.
+When a node is added to an empty list or the first node is deleted, the head pointer changes. Assigning the returned pointer back to `head` ensures that the program uses the correct starting node.
 
 ## Development Notes
 
-The project was developed incrementally to practice linked-list operations and understand pointer manipulation and memory management.
+This project was developed incrementally as a practical exercise in C programming.
 
-### 1. Node Structure and Traversal
+The main learning topics include:
 
-The initial implementation defined the node structure and introduced traversal using a temporary pointer.
+1. Defining a node structure and traversing a linked list.
+2. Allocating memory dynamically and appending nodes.
+3. Managing pointers while traversing the list.
+4. Searching for values and returning their indices.
+5. Deleting nodes, including the special case of deleting the head.
+6. Freeing dynamically allocated memory.
+7. Checking the result of `scanf()` before using input values.
 
-**Key concept:** A separate traversal pointer allows the program to visit each node without losing the original `head` pointer.
-
-### 2. Dynamic Allocation and Appending
-
-The `appendNode` function handles two cases:
-
-1. If the list is empty, the newly allocated node becomes the head.
-2. Otherwise, the function traverses the list and connects the new node to the last node.
-
-The new node's `next` pointer is initialized to `NULL`.
-
-**Key concepts:** Dynamic memory allocation, empty-list handling, and pointer traversal.
-
-### 3. Memory Management
-
-The `freeList` function releases nodes one at a time.
-
-Before freeing the current node, the function saves its address in a temporary pointer and advances to the next node.
-
-**Important lesson:** Accessing a node after freeing its memory can cause undefined behavior. The next pointer must be obtained before the current node is freed.
-
-### 4. Searching
-
-The `searchList` function traverses the list and compares each node's value with the target.
-
-The index starts at `0` and increases as the function moves through the list. The function returns immediately when it finds the first match; otherwise, it returns `-1`.
-
-**Design decision:** The `-1` result distinguishes a missing value from a valid zero-based index.
-
-### 5. Deleting Nodes
-
-The `deleteNode` function uses the search result to locate the target node.
-
-Three cases are handled:
-
-- **Target not found:** The list remains unchanged.
-- **Target is the head:** The head pointer advances to the next node, and the old head is freed.
-- **Target is not the head:** The predecessor is connected directly to the target's successor, and the target node is freed.
-
-During development, particular attention was given to traversal counts, selecting the correct node to free, printing the deleted value, and updating the head pointer when deleting the first node.
-
-### 6. Input Validation
-
-The program checks the return value of each `scanf` call. If an integer cannot be read successfully, it prints an error message, frees the allocated list, and exits with a nonzero status.
-
-This provides basic input-conversion error checking. Stricter validation, including rejecting trailing non-numeric characters, could be implemented using `fgets` and `strtol`.
+Comments are included in the source code to explain the purpose of the main operations and pointer manipulations.
 
 ## Complexity Analysis
 
 Let `n` be the number of nodes in the list.
 
-| Operation | Time Complexity | Explanation |
-| --- | --- | --- |
-| `printList` | O(n) | Visits each node once. |
-| `appendNode` | O(n) | Traverses the list to find the last node. |
-| `searchList` | O(n) | May visit every node. |
-| `deleteNode` | O(n) | Searches for the target and may traverse the list again. |
-| `freeList` | O(n) | Frees each node once. |
+| Function | Time Complexity |
+|---|---|
+| `printList()` | O(n) |
+| `appendNode()` | O(n) |
+| `searchList()` | O(n) |
+| `deleteNode()` | O(n) |
+| `freeList()` | O(n) |
 
-The list uses O(n) memory for its nodes.
+The list requires O(n) memory for its nodes.
 
-**Potential optimization:** Maintaining a tail pointer could make appending O(1), excluding allocation overhead. Deletion could also be implemented with a single traversal rather than searching first and traversing again.
+Note: `deleteNode()` searches for the target and then traverses the list again when the target is not the head. A future improvement could perform the search and deletion in a single traversal.
 
 ## Build and Run
 
-Save the source code as `linked_list.c`.
+### Requirements
 
-### Using GCC
+- A C compiler, such as GCC or Clang.
+- Git Bash or another terminal on Windows, or a terminal on Linux/macOS.
 
-Compile with C11 support and common warnings enabled:
+### Compile with GCC
 
-```bash
-gcc -std=c11 -Wall -Wextra -Wpedantic linked_list.c -o linked_list
-```
-
-Run on Linux or macOS:
+Run the following command from the project directory:
 
 ```bash
-./linked_list
+gcc -std=c11 -Wall -Wextra -Wpedantic Singly-linked-list.c -o Singly-linked-list.exe
 ```
 
-On Windows with GCC in Git Bash, run:
+### Run on Windows using Git Bash
 
 ```bash
-./linked_list.exe
+./Singly-linked-list.exe
 ```
 
-The executable name depends on the compiler and environment.
+### Run on Linux or macOS
 
-### Using Clang
+Compile with an output filename appropriate for your system:
 
 ```bash
-clang -std=c11 -Wall -Wextra -Wpedantic linked_list.c -o linked_list
+gcc -std=c11 -Wall -Wextra -Wpedantic Singly-linked-list.c -o singly-linked-list
 ```
 
-Run the generated executable using the appropriate command for your operating system.
+Then run:
+
+```bash
+./singly-linked-list
+```
 
 ## Example Session
 
@@ -187,59 +146,35 @@ Enter number to delete from the list: 20
 10    30
 ```
 
-The list values are separated by tab characters in the actual program, so the spacing may vary between terminals.
+The values in the final list are separated by tab characters.
 
-## Testing
+## Current Limitations
 
-The following cases should be tested:
+- The program accepts exactly three initial integers.
+- Each run performs one search and one deletion attempt.
+- Only the first occurrence of a duplicate value is deleted.
+- Input validation checks whether `scanf()` successfully reads an integer, but does not validate the entire input line.
+- Appending a node requires traversing the list to find its end.
+- If memory allocation fails, the program frees the existing list and exits.
 
-- [ ] Search for an existing value.
-- [ ] Search for a value that does not exist.
-- [ ] Delete the first node.
-- [ ] Delete a node in the middle.
-- [ ] Delete the last node.
-- [ ] Attempt to delete a missing value.
-- [ ] Test duplicate values and verify that only the first occurrence is deleted.
-- [ ] Test non-numeric input at each prompt.
-- [ ] Test deletion until the list becomes empty.
+## Future Improvements
 
-Automated unit tests have not yet been implemented.
+- Allow the user to enter an arbitrary number of elements.
+- Add a menu for repeated list operations.
+- Improve input validation using `fgets()` and `strtol()`.
+- Optimize deletion to use a single traversal.
+- Maintain a tail pointer to make appending more efficient.
+- Add automated tests and memory-checking tools.
 
-## Limitations and Future Improvements
+## Repository
 
-- The program always reads exactly three initial integers.
-- The list cannot currently be modified through a repeated interactive menu.
-- Only the first occurrence of a duplicate value is searched or deleted.
-- `scanf` provides basic input validation but does not strictly validate the entire input line.
-- Appending requires a traversal to the end of the list.
-- Deletion searches for the target and then traverses the list again.
-- If `malloc` fails, `appendNode` frees the current list and terminates the program.
-- Automated unit tests have not yet been implemented.
-
-Possible future improvements include:
-
-- Allowing the user to enter an arbitrary number of elements.
-- Adding an interactive menu for list operations.
-- Improving error handling and input validation.
-- Optimizing appending with a tail pointer.
-- Implementing deletion with a single traversal.
-- Adding automated tests and memory-checking tools.
+GitHub: https://github.com/sevdatlby/singly-linked-list-c
 
 ## Changelog
 
-### Initial Implementation
+### Initial Version
 
-- Defined the node structure and implemented list printing.
-- Added dynamic allocation, appending, and memory cleanup.
-- Implemented searching with zero-based indexing.
-- Implemented deletion, including head-node and missing-target cases.
-
-### Input Handling and Documentation
-
-- Added checks for failed integer input and cleanup before early termination.
-- Refined comments to explain pointer manipulation and memory management.
-- Documented the implementation, design decisions, limitations, and future improvements.
-
----
-
-This project is a learning exercise and may be extended as new C programming and data-structure concepts are learned.
+- Implemented the singly linked list node structure.
+- Added functions for printing, appending, searching, deleting, and freeing nodes.
+- Added basic input validation and explanatory comments.
+- Documented the implementation and build instructions.
